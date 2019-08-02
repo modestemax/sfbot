@@ -1,16 +1,10 @@
 public
 with sharing class TradingViewFeed implements ITask {
-  string exchangeId = 'binance';
-  string filter = 'btc$';
-  integer timeframe;
-public
-  TradingViewFeed(integer timeframe) {
-    if (timeframe == null)
-      this.timeframe = 60 * 24;
-    this.timeframe = timeframe;
-  }
-public
-  string getBody() {
+  static string exchangeId = 'binance';
+  static string filter = 'btc$';
+  static Integer[] timeframes = new Integer[]{15, 60, 60 * 4};
+
+  static string getRequestBody(integer timeframe) {
     String timeframeFilter;
     if (timeframe == null || timeframe == 60 * 24) {
       timeframeFilter = '';
@@ -20,55 +14,51 @@ public
       timeframeFilter = '|' + timeframe;
     }
     String body =
-        '{' + '"filter": [' + '{ "left": "change"' + timeframeFilter +
-        ', "operation": "nempty" },' +
+        '{' + '"filter": [' + '{ "left": "change' + timeframeFilter +
+        '", "operation": "nempty" },' +
         '{ "left": "exchange", "operation": "equal", "right":"' +
         exchangeId.toUpperCase() + '" },' +
         '{ "left": "name,description", "operation": "match", "right":"' +
         filter + '" }' + '],' + '"symbols": { "query": { "types": [] } },' +
-        '"columns":' + getColumns(timeframeFilter) + ',' +
-        '"sort": { "sortBy": "change"' + timeframeFilter +
-        ', "sortOrder": "desc" },' + '"options": { "lang": "en" },' +
+        '"columns":' + getColumnsAsJSON(timeframeFilter) + ',' +
+        '"sort": { "sortBy": "change' + timeframeFilter +
+        '", "sortOrder": "desc" },' + '"options": { "lang": "en" },' +
         '"range": [0, 150]' + '}';
     System.debug('body in ' + body);
     return body;
   }
-public
-  string[] getColumns2() {
-    String[] columns2 = new String[]{
+
+  static string[] getTimeframeDependendColumns() {
+    return new String[]{
         'close', 'change', 'high', 'low', 'ADX', 'ADX-DI', 'ADX+DI', 'RSI',
         'EMA10', 'EMA20', 'MACD.macd', 'MACD.signal', 'open',
         'change_from_open', 'Mom',
         // 'Aroon.Up', 'Aroon.Down',  'Recommend.All','volume', 'VWMA',
         //'Stoch.K', 'Stoch.D', 'Stoch.RSI.K', 'Stoch.RSI.D',
         'BB.lower', 'BB.upper', 'EMA200', 'EMA50', 'EMA100', 'EMA30'};
-    return columns2;
   }
-public
-  string[] getColumns1() {
-    String[] columns1 = new String[]{
+
+  static string[] getStaticColumns() {
+    return new String[]{
         'name', 'bid', 'ask' //,  'exchange', 'description', 'Volatility.D'
     };
-    return columns1;
   }
-public
-  string getColumns(String timeframeFilter) {
-    String sColumns ='';
 
-    for (string col : getColumns1()) {
-      sColumns += '"' + col + '",';
-    }
-    for (string col : getColumns2()) {
-      sColumns += '"' + col + '"' + timeframeFilter + ',';
-    }
-    sColumns = '[' + sColumns.substringBeforeLast(',') + ']';
-    System.debug('comlums ' + sColumns);
+  static string getColumnsAsJSON(String timeframeFilter) {
+    String[] columns = getStaticColumns();
 
-    return sColumns;
+    for (string col : getTimeframeDependendColumns()) {
+      columns.add(col + timeframeFilter);
+    }
+    System.debug('comlums ' + columns);
+    return JSON.serialize(columns);
   }
-public
-  void execute() {
+
+@future(callout=true)
+  static void callOut(integer timeframe) {
     System.debug('tv feed');
+    if (timeframe == null)
+      timeframe = 60 * 24;
 
     Http http = new Http();
     HttpRequest request = new HttpRequest();
@@ -77,27 +67,25 @@ public
 
     request.setHeader('Content-Type', 'application/json;charset=UTF-8');
     // Set the body as a JSON object
-    request.setBody(getBody());
+    request.setBody(getRequestBody(timeframe));
     HttpResponse response = http.send(request);
-    // Parse the JSON response
-    System.debug('The status code returned was not expected: ' +
-                 response.getStatusCode() + ' ' + response.getStatus());
+    System.debug('The status code returned was : ' + response.getStatusCode() +
+                 ' ' + response.getStatus());
 
     if (response.getStatusCode() == 200) {
-      updateSignals(response.getBody());
+      updateSignals(timeframe, response.getBody());
     } else {
       System.debug('trading view error ' + response.getBody());
     }
   }
 
-private
-  void updateSignals(String json) {
+  static void updateSignals(integer timeframe, String json) {
     TradingViewResult result = TradingViewResult.parse(json);
     signal__c[] signals = new signal__c[]{};
     for (TradingViewResult.Data data : result.data) {
 
-      String[] cols = getColumns1();
-      cols.addAll(getColumns2());
+      String[] cols = getStaticColumns();
+      cols.addAll(getTimeframeDependendColumns());
       Integer i = 0;
       signal__c s = new signal__c(Timeframe__c = timeframe);
       for (String col : cols) {
@@ -119,11 +107,17 @@ private
                 s.put(colApi + '__c', Decimal.valueOf((String)data.d[i]));
             }
           }
-
         i++;
       }
       signals.add(s);
     }
     insert signals;
+  }
+
+public
+  static void execute() {
+    for (integer timeframe : timeframes) {
+      callOut(timeframe);
+    }
   }
 }
