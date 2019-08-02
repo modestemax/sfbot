@@ -2,9 +2,13 @@ public
 with sharing abstract class AlgoBase implements IAlgo {
 protected
   Algo__c algo;
+public
   static signal__c current;
+public
   static signal__c last;
+public
   static signal__c prev;
+public
   static signal__c[] signals;
 
 public
@@ -27,15 +31,15 @@ public
 
 public
   void test() {
-    if (testBuy(current, last, prev, Signals)) {
+    if (testBuy()) {
       System.debug('o');
+      // insert new trade__c(Algo__c = algo, symbol__c = current.symbol__c,
+      //                     signal__c = current);
     }
   }
 public
-  abstract Boolean testBuy(signal__c current, signal__c last, signal__c prev,
-                           signal__c[] signals);
+  abstract Boolean testBuy();
 
 public
-  abstract Boolean testSell(signal__c current, signal__c last, signal__c prev,
-                            signal__c[] signals);
+  virtual Boolean testSell() { return false; }
 }
