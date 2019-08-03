@@ -2,7 +2,7 @@ public
 with sharing class TradingViewFeed implements ITask {
   static string exchangeId = 'binance';
   static string filter = 'btc$';
-  static Integer[] timeframes = new Integer[]{15, 60, 60 * 4};
+  static Integer[] timeframes = new Integer[]{/*15,*/ 60, 60 * 4};
 
   static string getRequestBody(integer timeframe) {
     String timeframeFilter;
@@ -23,7 +23,7 @@ with sharing class TradingViewFeed implements ITask {
         '"columns":' + getColumnsAsJSON(timeframeFilter) + ',' +
         '"sort": { "sortBy": "change' + timeframeFilter +
         '", "sortOrder": "desc" },' + '"options": { "lang": "en" },' +
-        '"range": [0, 150]' + '}';
+        '"range": [0, 160]' + '}';
     // System.debug('body in ' + body);
     return body;
   }
@@ -100,8 +100,8 @@ with sharing class TradingViewFeed implements ITask {
       String[] cols = getStaticColumns();
       cols.addAll(getTimeframeDependendColumns());
       Integer i = 0;
-
-      signal__c s = new signal__c(Name =String.valueOf( signalId), time__c = signalTime,
+      String name = data.s + ':' + signalId;
+      signal__c s = new signal__c(Name = name, time__c = signalTime,
                                   Timeframe__c = timeframe);
       for (String col : cols) {
         // System.debug('result ' + col + ' = ' + data.d[i]);
@@ -126,7 +126,24 @@ with sharing class TradingViewFeed implements ITask {
       }
       signals.add(s);
     }
-    insert signals;
+    // insert signals;
+    insertOrUpdate(signals);
+  }
+
+  static void insertOrUpdate(signal__c[] signals) {
+    Map<String, signal__c> newMap = new map<String, signal__c>();
+    for (signal__c signal : signals) {
+      newMap.put(signal.name, signal);
+    }
+
+    for (signal__c old :
+         [select name from signal__c where name in:newMap.keySet()]) {
+      signal__c signal = newMap.get(old.name);
+      if (signal != null) {
+        signal.id = old.id;
+      }
+    }
+    upsert newMap.values();
   }
 
 public
