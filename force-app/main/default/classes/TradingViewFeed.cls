@@ -24,7 +24,7 @@ with sharing class TradingViewFeed implements ITask {
         '"sort": { "sortBy": "change' + timeframeFilter +
         '", "sortOrder": "desc" },' + '"options": { "lang": "en" },' +
         '"range": [0, 150]' + '}';
-    System.debug('body in ' + body);
+    // System.debug('body in ' + body);
     return body;
   }
 
@@ -50,13 +50,12 @@ with sharing class TradingViewFeed implements ITask {
     for (string col : getTimeframeDependendColumns()) {
       columns.add(col + timeframeFilter);
     }
-    System.debug('comlums ' + columns);
+    // System.debug('comlums ' + columns);
     return JSON.serialize(columns);
   }
 
-@future(callout=true)
-  static void callOut(integer timeframe) {
-    System.debug('tv feed');
+  @future(callout = true) static void callOut(integer timeframe) {
+    // System.debug('tv feed');
     if (timeframe == null)
       timeframe = 60 * 24;
 
@@ -69,8 +68,8 @@ with sharing class TradingViewFeed implements ITask {
     // Set the body as a JSON object
     request.setBody(getRequestBody(timeframe));
     HttpResponse response = http.send(request);
-    System.debug('The status code returned was : ' + response.getStatusCode() +
-                 ' ' + response.getStatus());
+    // System.debug('The status code returned was : ' + response.getStatusCode()
+    // + ' ' + response.getStatus());
 
     if (response.getStatusCode() == 200) {
       updateSignals(timeframe, response.getBody());
@@ -78,18 +77,34 @@ with sharing class TradingViewFeed implements ITask {
       System.debug('trading view error ' + response.getBody());
     }
   }
+  static long timeframeDuration(integer timeframe) {
+    return timeframe * 60 * 1000L;
+  }
+
+  static long getSignalId(integer timeframe) {
+    Datetime dt = Datetime.now();
+    Long ctime = dt.getTime();
+    return ctime / timeframeDuration(timeframe);
+  }
+  static Datetime getSignalTime(long id, integer timeframe) {
+    return Datetime.newInstance(id * timeframeDuration(timeframe));
+  }
 
   static void updateSignals(integer timeframe, String json) {
     TradingViewResult result = TradingViewResult.parse(json);
     signal__c[] signals = new signal__c[]{};
+    long signalId = getSignalId(timeframe);
+    Datetime signalTime = getSignalTime(signalId, timeframe);
     for (TradingViewResult.Data data : result.data) {
 
       String[] cols = getStaticColumns();
       cols.addAll(getTimeframeDependendColumns());
       Integer i = 0;
-      signal__c s = new signal__c(Timeframe__c = timeframe);
+
+      signal__c s = new signal__c(Name =String.valueOf( signalId), time__c = signalTime,
+                                  Timeframe__c = timeframe);
       for (String col : cols) {
-        System.debug('result ' + col + ' = ' + data.d[i]);
+        // System.debug('result ' + col + ' = ' + data.d[i]);
         string colApi = col;
         switch
           on col {
