@@ -10,8 +10,9 @@ public
   }
 public
   void execute() {
-     AlgoBase.newSignals(
-        [select Name from signal__c order by signal_Id__c desc limit 5]);
+     AlgoBase.newSignals(null
+       // [select Name from signal__c order by signal_Id__c desc limit 5]
+        );
         
     for (AlgoBase algo : algos) {
       algo.Test();

@@ -152,4 +152,8 @@ public
       callOut(timeframe);
     }
   }
+  public static void execute( integer timeframe) {
+       callOut(timeframe);
+    
+  }
 }
