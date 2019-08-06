@@ -1,7 +1,7 @@
 public
 interface IAlgo {
 
-  IAlgo init(Algo__c algo);
+  IAlgo init(Algo_Setting__mdt algo);
 
   Boolean testBuy();
 

@@ -2,7 +2,10 @@ public
 with sharing class TradingViewFeed implements ITask {
   static string exchangeId = 'binance';
   static string filter = 'btc$';
-  static Integer[] timeframes = new Integer[]{/*15,*/ 60, 60 * 4};
+  static Integer[] timeframes = new Integer[]{/*15,*/
+                                              //  60,
+                                              //  60 * 4,
+                                              5};
 
   static string getRequestBody(integer timeframe) {
     String timeframeFilter;
@@ -152,8 +155,6 @@ public
       callOut(timeframe);
     }
   }
-  public static void execute( integer timeframe) {
-       callOut(timeframe);
-    
-  }
+public
+  static void execute(integer timeframe) { callOut(timeframe); }
 }

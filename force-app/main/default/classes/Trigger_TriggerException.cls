@@ -1,0 +1,1 @@
+public class Trigger_TriggerException extends Exception {}

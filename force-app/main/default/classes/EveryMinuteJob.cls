@@ -35,10 +35,11 @@ public
 
     Datetime nextWorkerRun = Datetime.now().addMinutes(delayInMinutes);
     if (nextWorkerRun.addMinutes(delayInMinutes) < mainJob.NextFireTime) {
-      String cronExp = nextWorkerRun.second() + ' ' + nextWorkerRun.minute() +
-                       ' ' + nextWorkerRun.hour() + ' ' + nextWorkerRun.day() +
-                       ' ' + nextWorkerRun.month() + ' ? ' +
-                       nextWorkerRun.year();
+      String cronExp =
+          // nextWorkerRun.second()
+          58 + ' ' + nextWorkerRun.minute() + ' ' + nextWorkerRun.hour() + ' ' +
+          nextWorkerRun.day() + ' ' + nextWorkerRun.month() + ' ? ' +
+          nextWorkerRun.year();
       System.schedule(mainJob.CronJobDetail.Name + ' (worker)', cronExp,
                       new EveryMinuteJob(delayInMinutes, tasks, mainJob));
     }
@@ -52,5 +53,12 @@ public
       // log errors here
       System.debug('task exception ' + ex);
     }
+  }
+
+public
+  static void startJobs() {
+    System.schedule('Bot Job',
+                    '0 ' + (Datetime.now().minute() + 1) + ' /1 * * ? *',
+                    new EveryMinuteJob(1, new ITask[]{new TradingViewFeed()}));
   }
 }
