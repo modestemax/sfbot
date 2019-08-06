@@ -33,7 +33,7 @@ public
   Boolean isTest() { return algoSetting.is_test__c; }
 
 public
-  void test() {
+  virtual void test() {
     if (testBuy()) {
       System.debug('o');
       insert new trade__c(Side__c = 'buy', Status__c = 'open',

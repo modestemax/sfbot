@@ -1,6 +1,6 @@
 public
 with sharing class AllAlgos implements ITask {
-  AlgoBase[] algos;
+  AlgoBase[] algos=new AlgoBase[]{};
 public
   allAlgos() {
     for (Algo_Setting__mdt a : [
