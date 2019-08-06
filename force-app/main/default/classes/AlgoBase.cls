@@ -34,11 +34,12 @@ public
 
 public
   void test() {
-    // if (testBuy()) {
-    //   System.debug('o');
-    //   insert new trade__c(/*Algo__c = algo, symbol__c = current.symbol__c,
-    //                       signal__c = current*/);
-    // }
+    if (testBuy()) {
+      System.debug('o');
+      insert new trade__c(Side__c = 'buy', Status__c = 'open',
+                          symbol__c = current.symbol__c, type__c = 'market',
+                          Signal_Id__c = current.signal_Id__c, Quantity__c = 1);
+    }
   }
 public
   abstract Boolean testBuy();
