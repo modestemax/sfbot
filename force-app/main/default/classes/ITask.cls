@@ -1,3 +1,4 @@
-public interface ITask {
+public
+interface ITask {
   void execute();
 }

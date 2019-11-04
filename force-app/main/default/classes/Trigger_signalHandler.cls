@@ -1,16 +1,22 @@
-public with sharing class Trigger_signalHandler implements Trigger_ITrigger {
-public Trigger_signalHandler() {}
-public void bulkBefore() {}
+public
+with sharing class Trigger_signalHandler implements Trigger_ITrigger {
+public
+  Trigger_signalHandler() {}
+public
+  void bulkBefore() {}
 
-public void bulkAfter() {
+public
+  void bulkAfter() {
     runAllAlgos();
     deleteOldSignals();
   }
 
-public void beforeInsert(SObject so) {
+public
+  void beforeInsert(SObject so) {
     // Make sure that the related contact exist
   }
-public void beforeUpdate(SObject oldSo, SObject so) {}
+public
+  void beforeUpdate(SObject oldSo, SObject so) {}
 
   /**
    * beforeDelete
@@ -18,13 +24,17 @@ public void beforeUpdate(SObject oldSo, SObject so) {}
    * This method is called iteratively for each record to be deleted during a
    * BEFORE trigger.
    */
-public void beforeDelete(SObject so) {}
+public
+  void beforeDelete(SObject so) {}
 
-public void afterInsert(SObject so) {}
+public
+  void afterInsert(SObject so) {}
 
-public void afterUpdate(SObject oldSo, SObject so) {}
+public
+  void afterUpdate(SObject oldSo, SObject so) {}
 
-public void afterDelete(SObject so) {}
+public
+  void afterDelete(SObject so) {}
 
   /**
    * andFinally
@@ -33,7 +43,8 @@ public void afterDelete(SObject so) {}
    * Use this method to accomplish any final operations such as creation or
    * updates of other records.
    */
-public void andFinally() {}
+public
+  void andFinally() {}
 
   void deleteOldSignals() {
     if (Trigger.isInsert) {

@@ -1,4 +1,5 @@
-public with sharing class TradingViewFeed implements ITask {
+public
+with sharing class TradingViewFeed implements ITask {
   static String exchangeId = 'binance';
   static String filter = 'btc$';
   static Integer[] timeframes = new Integer[]{/*15,*/
@@ -57,11 +58,10 @@ public with sharing class TradingViewFeed implements ITask {
     return JSON.serialize(columns);
   }
 
-  @Future(Callout = true) static void callOut(Integer timeframe) {
+  @future(callout = true) static void callOut(Integer timeframe) {
     // System.debug('tv feed');
-    if (timeframe == null) {
+    if (timeframe == null)
       timeframe = 60 * 24;
-    }
 
     Http http = new Http();
     HttpRequest request = new HttpRequest();
@@ -141,7 +141,7 @@ public with sharing class TradingViewFeed implements ITask {
     }
 
     for (Signal__c old :
-         [SELECT Name FROM Signal__c WHERE Name IN:newMap.keySet()]) {
+         [select Name from Signal__c where Name in:newMap.keySet()]) {
       Signal__c signal = newMap.get(old.Name);
       if (signal != null) {
         signal.Id = old.Id;
@@ -150,10 +150,12 @@ public with sharing class TradingViewFeed implements ITask {
     upsert newMap.values();
   }
 
-public static void execute() {
+public
+  static void execute() {
     for (Integer timeframe : timeframes) {
       callOut(timeframe);
     }
   }
-public static void execute(Integer timeframe) { callOut(timeframe); }
+public
+  static void execute(Integer timeframe) { callOut(timeframe); }
 }

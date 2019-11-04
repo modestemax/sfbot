@@ -1,4 +1,5 @@
-public interface IAlgo {
+public
+interface IAlgo {
 
   IAlgo init(Algo_Setting__mdt algo);
 
