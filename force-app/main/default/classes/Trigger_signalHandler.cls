@@ -1,22 +1,16 @@
-public
-with sharing class Trigger_signalHandler implements Trigger_ITrigger {
-public
-  Trigger_signalHandler() {}
-public
-  void bulkBefore() {}
+public with sharing class Trigger_signalHandler implements Trigger_ITrigger {
+public Trigger_signalHandler() {}
+public void bulkBefore() {}
 
-public
-  void bulkAfter() {
+public void bulkAfter() {
     runAllAlgos();
     deleteOldSignals();
   }
 
-public
-  void beforeInsert(SObject so) {
+public void beforeInsert(SObject so) {
     // Make sure that the related contact exist
   }
-public
-  void beforeUpdate(SObject oldSo, SObject so) {}
+public void beforeUpdate(SObject oldSo, SObject so) {}
 
   /**
    * beforeDelete
@@ -24,17 +18,13 @@ public
    * This method is called iteratively for each record to be deleted during a
    * BEFORE trigger.
    */
-public
-  void beforeDelete(SObject so) {}
+public void beforeDelete(SObject so) {}
 
-public
-  void afterInsert(SObject so) {}
+public void afterInsert(SObject so) {}
 
-public
-  void afterUpdate(SObject oldSo, SObject so) {}
+public void afterUpdate(SObject oldSo, SObject so) {}
 
-public
-  void afterDelete(SObject so) {}
+public void afterDelete(SObject so) {}
 
   /**
    * andFinally
@@ -43,18 +33,17 @@ public
    * Use this method to accomplish any final operations such as creation or
    * updates of other records.
    */
-public
-  void andFinally() {}
+public void andFinally() {}
 
   void deleteOldSignals() {
-    if (trigger.isInsert) {
-      Decimal signalId = ((signal__c)trigger.new[0]).signal_id__c;
+    if (Trigger.isInsert) {
+      Decimal signalId = ((Signal__c)Trigger.new[0]).signal_Id__c;
       System.debug('trigger after insert id ' + signalId);
-      signal__c[] toDel =
-          [select id from signal__c where signal_id__c <=:signalId - 3];
+      Signal__c[] toDel =
+          [SELECT Id FROM Signal__c WHERE signal_Id__c <=:signalId - 3];
       delete toDel;
     }
   }
 
-  void runAllAlgos() { AllAlgos.runall(); }
+  void runAllAlgos() { AllAlgos.runAll(); }
 }

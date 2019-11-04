@@ -14,7 +14,7 @@ public with sharing class Trigger_TriggerFactory
      *
      * Throws a TriggerException if no handler has been coded.
      */
-    public static void createHandler(Schema.sObjectType soType)
+    public static void createHandler(Schema.SObjectType soType)
     {
         // Get a handler appropriate to the object being processed
         Trigger_ITrigger handler = getHandler(soType);
@@ -110,9 +110,9 @@ public with sharing class Trigger_TriggerFactory
      *
      * Returns:     ITrigger - A trigger handler if one exists or null.
      */
-    private static Trigger_ITrigger getHandler(Schema.sObjectType soType)
+    private static Trigger_ITrigger getHandler(Schema.SObjectType soType)
     {
-        if (soType == signal__c.sObjectType)
+        if (soType == Signal__c.SObjectType)
         {
             return new Trigger_signalHandler();
         }  

@@ -1,18 +1,15 @@
-public
-with sharing class Spirit_v1 extends Spirit {
+public with sharing class Spirit_v1 extends Spirit {
 
-public
-  override Boolean testBuy() {
-    if (last != null && current != null && prev != null) {
-      System.debug('test SpiritV1 buy Start!' + algoSetting + current);
-      if ((last.ema30__c < last.ema10__c) && (last.ema30__c >= last.ema20__c)) {
-      }
-      if (last.ema20__c > last_bbb)
-        if ((last.bb_upper__c > prev.bb_upper__c) &&
-            (last.ema10__c > prev.ema10__c))
-          if (current.close__c <= current.bb_upper__c)
-            if (((current.bb_upper__c / current.bb_lower__c) - 1) * 100 >= 2)
-              return true;
+public override Boolean testBuy() {
+
+    System.debug('test SpiritV1 buy Start!' + algoSetting + current);
+    if ((last.EMA30__c < last.EMA10__c) && (last.EMA30__c >= last.EMA20__c)) {
+        if (last.EMA20__c > last_bbb)
+            if ((last.BB_upper__c > prev.BB_upper__c) &&
+                    (last.EMA10__c > prev.EMA10__c))
+                if (current.Close__c <= current.BB_upper__c)
+                    if (((current.BB_upper__c / current.BB_lower__c) - 1) * 100 >= 2)
+                        return true;
     }
 
     return false;

@@ -1,13 +1,13 @@
-public
-with sharing class TradingViewFeed implements ITask {
-  static string exchangeId = 'binance';
-  static string filter = 'btc$';
+public with sharing class TradingViewFeed implements ITask {
+  static String exchangeId = 'binance';
+  static String filter = 'btc$';
   static Integer[] timeframes = new Integer[]{/*15,*/
-                                              //  60,
-                                              //  60 * 4,
-                                              5};
+                                                60
+                                              //  ,60 * 4,
+                                              //5
+                                              };
 
-  static string getRequestBody(integer timeframe) {
+  static String getRequestBody(Integer timeframe) {
     String timeframeFilter;
     if (timeframe == null || timeframe == 60 * 24) {
       timeframeFilter = '';
@@ -31,7 +31,7 @@ with sharing class TradingViewFeed implements ITask {
     return body;
   }
 
-  static string[] getTimeframeDependendColumns() {
+  static String[] getTimeframeDependendColumns() {
     return new String[]{
         'close', 'change', 'high', 'low', 'ADX', 'ADX-DI', 'ADX+DI', 'RSI',
         'EMA10', 'EMA20', 'MACD.macd', 'MACD.signal', 'open',
@@ -41,26 +41,27 @@ with sharing class TradingViewFeed implements ITask {
         'BB.lower', 'BB.upper', 'EMA200', 'EMA50', 'EMA100', 'EMA30'};
   }
 
-  static string[] getStaticColumns() {
+  static String[] getStaticColumns() {
     return new String[]{
         'name', 'bid', 'ask' //,  'exchange', 'description', 'Volatility.D'
     };
   }
 
-  static string getColumnsAsJSON(String timeframeFilter) {
+  static String getColumnsAsJSON(String timeframeFilter) {
     String[] columns = getStaticColumns();
 
-    for (string col : getTimeframeDependendColumns()) {
+    for (String col : getTimeframeDependendColumns()) {
       columns.add(col + timeframeFilter);
     }
     // System.debug('comlums ' + columns);
     return JSON.serialize(columns);
   }
 
-  @future(callout = true) static void callOut(integer timeframe) {
+  @Future(Callout = true) static void callOut(Integer timeframe) {
     // System.debug('tv feed');
-    if (timeframe == null)
+    if (timeframe == null) {
       timeframe = 60 * 24;
+    }
 
     Http http = new Http();
     HttpRequest request = new HttpRequest();
@@ -80,23 +81,23 @@ with sharing class TradingViewFeed implements ITask {
       System.debug('trading view error ' + response.getBody());
     }
   }
-  static long timeframeDuration(integer timeframe) {
+  static Long timeframeDuration(Integer timeframe) {
     return timeframe * 60 * 1000L;
   }
 
-  static long getSignalId(integer timeframe) {
+  static Long getSignalId(Integer timeframe) {
     Datetime dt = Datetime.now();
     Long ctime = dt.getTime();
     return ctime / timeframeDuration(timeframe);
   }
-  static Datetime getSignalTime(long id, integer timeframe) {
+  static Datetime getSignalTime(Long id, Integer timeframe) {
     return Datetime.newInstance(id * timeframeDuration(timeframe));
   }
 
-  static void updateSignals(integer timeframe, String json) {
+  static void updateSignals(Integer timeframe, String json) {
     TradingViewResult result = TradingViewResult.parse(json);
-    signal__c[] signals = new signal__c[]{};
-    long signalId = getSignalId(timeframe);
+    Signal__c[] signals = new Signal__c[]{};
+    Long signalId = getSignalId(timeframe);
     Datetime signalTime = getSignalTime(signalId, timeframe);
     for (TradingViewResult.Data data : result.data) {
 
@@ -104,11 +105,11 @@ with sharing class TradingViewFeed implements ITask {
       cols.addAll(getTimeframeDependendColumns());
       Integer i = 0;
       String name = data.s + ':' + signalId;
-      signal__c s = new signal__c(Name = name, time__c = signalTime,
+      Signal__c s = new Signal__c(Name = name, Time__c = signalTime,
                                   Timeframe__c = timeframe);
       for (String col : cols) {
         // System.debug('result ' + col + ' = ' + data.d[i]);
-        string colApi = col;
+        String colApi = col;
         switch
           on col {
             when 'name' { s.put('symbol__c', (String)data.d[i]); }
@@ -133,28 +134,26 @@ with sharing class TradingViewFeed implements ITask {
     insertOrUpdate(signals);
   }
 
-  static void insertOrUpdate(signal__c[] signals) {
-    Map<String, signal__c> newMap = new map<String, signal__c>();
-    for (signal__c signal : signals) {
-      newMap.put(signal.name, signal);
+  static void insertOrUpdate(Signal__c[] signals) {
+    Map<String, Signal__c> newMap = new Map<String, Signal__c>();
+    for (Signal__c signal : signals) {
+      newMap.put(signal.Name, signal);
     }
 
-    for (signal__c old :
-         [select name from signal__c where name in:newMap.keySet()]) {
-      signal__c signal = newMap.get(old.name);
+    for (Signal__c old :
+         [SELECT Name FROM Signal__c WHERE Name IN:newMap.keySet()]) {
+      Signal__c signal = newMap.get(old.Name);
       if (signal != null) {
-        signal.id = old.id;
+        signal.Id = old.Id;
       }
     }
     upsert newMap.values();
   }
 
-public
-  static void execute() {
-    for (integer timeframe : timeframes) {
+public static void execute() {
+    for (Integer timeframe : timeframes) {
       callOut(timeframe);
     }
   }
-public
-  static void execute(integer timeframe) { callOut(timeframe); }
+public static void execute(Integer timeframe) { callOut(timeframe); }
 }
