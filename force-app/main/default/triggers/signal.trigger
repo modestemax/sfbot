@@ -1,5 +1,5 @@
-trigger signal on signal__c(before insert, before update, before delete,
+trigger signal on Signal__c(before insert, before update, before delete,
                             after insert, after update, after delete) {
 
-  Trigger_TriggerFactory.createHandler(signal__c.sObjectType);
+  Trigger_TriggerFactory.createHandler(Signal__c.SObjectType);
 }
