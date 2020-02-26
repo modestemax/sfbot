@@ -5,22 +5,16 @@
 public
 class TradingViewResult {
 
-public
-  List<Data> data;
-public
-  Integer totalCount;
+    public List<Data> data;
+    public Integer totalCount;
 
-public
-  class Data {
-  public
-    String s;
-  public
-    List<String> d;
-  }
+    public class Data {
+        public String s;
+        public List<String> d;
+    }
 
-  public static TradingViewResult
-  parse(String json) {
-    return (TradingViewResult)System.JSON.deserialize(json,
-                                                      TradingViewResult.class);
-  }
+    public static TradingViewResult
+    parse(String json) {
+        return (TradingViewResult) System.JSON.deserialize(json, TradingViewResult.class);
+    }
 }

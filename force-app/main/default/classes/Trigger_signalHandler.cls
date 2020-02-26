@@ -46,6 +46,7 @@ public with sharing class Trigger_signalHandler implements Trigger_ITrigger {
     public void andFinally() {
     }
 
+
     static void deleteOldSignals() {
         if (Trigger.isInsert) {
             Decimal signalId = ((Signal__c) Trigger.new[0]).signal_Id__c;
@@ -60,13 +61,12 @@ public with sharing class Trigger_signalHandler implements Trigger_ITrigger {
     }
 
     static void updateTrades() {
-        Trade__c[]trades = new List<Trade__c>();
+        Trade__c[]trades = [SELECT Id,Symbol__c FROM Trade__c WHERE Status__c = 'open'];
 
-        for (Trade__c trade : [SELECT Id,Symbol__c FROM Trade__c WHERE Status__c = 'open']) {
-            Signal__c signal = AlgoBase.getCurrentSignalForSymbol(trade.Symbol__c);
-            if (signal != null) {
-                trade.Price__c = signal.Bid__c;
-                trades.add(trade);
+        for (Trade__c trade : trades) {
+            Signal__c[] signal = [SELECT Bid__c FROM Signal__c WHERE Symbol__c = :trade.Symbol__c ORDER BY CreatedDate DESC LIMIT 1];
+            if (signal.size() != 0) {
+                trade.Price__c = signal[0].Bid__c;
             }
         }
         upsert trades;

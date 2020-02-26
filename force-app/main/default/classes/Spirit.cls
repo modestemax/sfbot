@@ -9,9 +9,9 @@ protected
 public
   override void test() {
     current_bbb =
-        current.BB_upper__c - (current.BB_upper__c - current.BB_lower__c) / 2;
-    last_bbb = last.BB_upper__c - (last.BB_upper__c - last.BB_lower__c) / 2;
-    prev_bbb = prev.BB_upper__c - (prev.BB_upper__c - prev.BB_lower__c) / 2;
+        current.bb_upper__c - (current.bb_upper__c - current.bb_lower__c) / 2;
+    last_bbb = last.bb_upper__c - (last.bb_upper__c - last.bb_lower__c) / 2;
+    prev_bbb = prev.bb_upper__c - (prev.bb_upper__c - prev.bb_lower__c) / 2;
     super.test();
   }
 }

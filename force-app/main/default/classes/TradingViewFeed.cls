@@ -1,7 +1,7 @@
 public with sharing class TradingViewFeed implements ITask {
     static String exchangeId = 'binance';
     static String filter = 'btc$';
-    static Integer[] timeframes = new List<Integer>();
+    static Set<Integer> timeframes = new Set<Integer>();
 
     static void initTimeframes() {
         for (Algo_Setting__mdt setting : [SELECT Timeframe__c FROM Algo_Setting__mdt WHERE Is_active__c = TRUE]) {
@@ -19,24 +19,25 @@ public with sharing class TradingViewFeed implements ITask {
         } else {
             timeframeFilter = '|' + timeframe;
         }
-        String body =
-                '{' + '"filter": [' + '{ "left": "change' + timeframeFilter +
-                        '", "operation": "nempty" },' +
-                        '{ "left": "exchange", "operation": "equal", "right":"' +
-                        exchangeId.toUpperCase() + '" },' +
-                        '{ "left": "name,description", "operation": "match", "right":"' +
-                        filter + '" }' + '],' + '"symbols": { "query": { "types": [] } },' +
-                        '"columns":' + getColumnsAsJSON(timeframeFilter) + ',' +
-                        '"sort": { "sortBy": "change' + timeframeFilter +
-                        '", "sortOrder": "desc" },' + '"options": { "lang": "en" },' +
-                        '"range": [0, 160]' + '}';
+        String body = '{' + '"filter": [' +
+                '{ "left": "change' + timeframeFilter + '", "operation": "nempty" },' +
+                '{ "left": "exchange", "operation": "equal", "right":"' + exchangeId.toUpperCase() + '" },' +
+                '{ "left": "name,description", "operation": "match", "right":"' + filter + '" }' +
+//                ',{"left":"change_abs","operation":"greater","right":1e-7}' +
+                '],' +
+                '"symbols": { "query": { "types": [] } },' +
+                '"columns":' + getColumnsAsJSON(timeframeFilter) + ',' +
+                '"sort": { "sortBy": "change' + timeframeFilter + '", ' +
+                '"sortOrder": "desc" },' + '"options": { "lang": "en" },' +
+                '"range": [0, 200]'
+                + '}';
         // System.debug('body in ' + body);
         return body;
     }
 
     static String[] getTimeframeDependentColumns() {
         return new String[]{
-                'close', 'change', 'high', 'low', 'ADX', 'ADX-DI', 'ADX+DI', 'RSI',
+                'close', 'change', 'change_abs', 'high', 'low', 'ADX', 'ADX-DI', 'ADX+DI', 'RSI',
                 'EMA10', 'EMA20', 'MACD.macd', 'MACD.signal', 'open',
                 'change_from_open', 'Mom',
                 // 'Aroon.Up', 'Aroon.Down',  'Recommend.All','volume', 'VWMA',
@@ -104,21 +105,22 @@ public with sharing class TradingViewFeed implements ITask {
         };
         Long signalId = getSignalId(timeframe);
         Datetime signalTime = getSignalTime(signalId, timeframe);
-        for (TradingViewResult.Data data : result.data) {
 
+        Integer rank = 0;
+        for (TradingViewResult.Data data : result.data) {
             String[] cols = getStaticColumns();
             cols.addAll(getTimeframeDependentColumns());
             Integer i = 0;
             String name = data.s + ':' + signalId;
-            Signal__c s = new Signal__c(Name = name, Time__c = signalTime,
-                    Timeframe__c = timeframe);
+
+            Signal__c signal = new Signal__c(Name = name, Time__c = signalTime, Timeframe__c = timeframe, rank__c = ++rank);
             for (String col : cols) {
                 // System.debug('result ' + col + ' = ' + data.d[i]);
                 String colApi = col;
                 switch
                 on col {
                     when 'name' {
-                        s.put('symbol__c', (String) data.d[i]);
+                        signal.put('symbol__c', (String) data.d[i]);
                     }
                     when else {
                         switch
@@ -133,14 +135,16 @@ public with sharing class TradingViewFeed implements ITask {
                                 colApi = col.replaceAll('[-+.]', '_');
                             }
                         }
-                        if (data.d[i] != null)
-                            s.put(colApi + '__c', Decimal.valueOf((String) data.d[i]));
+                        if (data.d[i] != null) {
+                            signal.put(colApi + '__c', Decimal.valueOf((String) data.d[i]));
+                        }
                     }
                 }
                 i++;
             }
-            signals.add(s);
+            signals.add(signal);
         }
+        signals.sort();
         // insert signals;
         insertOrUpdate(signals);
     }
@@ -148,12 +152,14 @@ public with sharing class TradingViewFeed implements ITask {
     static void insertOrUpdate(Signal__c[] signals) {
         Map<String, Signal__c> newMap = new Map<String, Signal__c>();
         for (Signal__c signal : signals) {
+            System.debug('new signal ' + signal.Name);
             newMap.put(signal.Name, signal);
         }
 
-        for (Signal__c old : [SELECT Name FROM Signal__c WHERE Name IN:newMap.keySet()]) {
+        for (Signal__c old : [SELECT Name FROM Signal__c WHERE Name IN :newMap.keySet()]) {
             Signal__c signal = newMap.get(old.Name);
             if (signal != null) {
+                System.debug('update signal ' + signal.Name);
                 signal.Id = old.Id;
             }
         }

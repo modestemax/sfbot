@@ -36,15 +36,15 @@ public with sharing class Trigger_tradeHandler implements Trigger_ITrigger {
                     trade.Take_Profit__c += trade.Trailing_Stop_Loss_Value__c;
                     trade.Stop_Loss__c += trade.Trailing_Stop_Loss_Value__c;
                 }else{
-                    trade.Status__c = 'closed';
+//                    trade.Status__c = 'closed';
                 }
                 trade.Note__c += ' -> take profit';
             } else if (trade.Change__c <= trade.Stop_Loss__c) {
                 trade.Note__c += trade.Change__c <= 0 ? ' -> stop loss' : ' -> stop loss win';
-                trade.Status__c = 'closed';
+//                trade.Status__c = 'closed';
             } else if (trade.Close_position_based_on_age__c && trade.Max_age_In_Minutes__c <= Utils.minutesFromNow(trade.CreatedDate)) {
                 trade.Note__c += trade.Change__c <= 0 ? '-> aged trade loss' : '-> aged trade win';
-                trade.Status__c = 'closed';
+//                trade.Status__c = 'closed';
             }
 
         }
