@@ -46,7 +46,6 @@ with sharing abstract class AlgoBase implements IAlgo {
 //        return symbols;
 //    }
 
-
     public static Signal__c getPreviousSignalBySymbol(String symbol, Decimal timeframe) {
         return getSignalAtPositionBySymbol(symbol, 2, timeframe);
     }
@@ -62,9 +61,8 @@ with sharing abstract class AlgoBase implements IAlgo {
             Map<Decimal, Signal__c> signalsIdMap = new Map<Decimal, Signal__c>();
 
             for (Signal__c signal : signals) {
-                if (signal.Timeframe__c == timeframe) {
+                if (signal.Timeframe__c == timeframe)
                     signalsIdMap.put(signal.signal_Id__c, signal);
-                }
             }
             List<Decimal> signalIds = new List<Decimal>(signalsIdMap.keySet());
             signalIds.sort();
@@ -104,39 +102,21 @@ with sharing abstract class AlgoBase implements IAlgo {
             System.debug('#test buy Start! ' + algoSetting.Name__c + '( ' + algoSetting.Timeframe__c + ')' + current.Symbol__c);
             if (testBuyCatch()) {
                 System.debug('new test succeed');
-                if ([
+                /* if ([
+                         SELECT Id
+                         FROM Trade__c
+                         WHERE Status__c = 'open'
+                         AND Algo__c = :algoSetting.Name__c
+                 ].size() < algoSetting.Trade_Count__c) {
+                 */ if ([
                         SELECT Id
                         FROM Trade__c
-                        WHERE Status__c = 'open'
-                        AND Algo__c = :algoSetting.Name__c
-                ].size() < algoSetting.Trade_Count__c) {
-                    if ([
-                            SELECT Id
-                            FROM Trade__c
-                            WHERE Symbol__c = :current.Symbol__c AND Status__c = 'open'
-                            AND Algo__c = :algoSetting.Name__c
-                    ].size() == 0) {
-
-                        insert new Trade__c(Side__c = 'buy', Status__c = 'open',
-                                Symbol__c = current.Symbol__c, Type__c = 'market',
-                                Signal_Id__c = current.signal_Id__c,
-                                Algo__c = algoSetting.Name__c,
-                                Take_Profit__c = algoSetting.Take_Profit__c,
-                                Stop_Loss__c = algoSetting.Stop_Loss__c,
-                                System_Stop_Loss__c = algoSetting.Stop_Loss__c,
-                                System_Take_Profit__c = algoSetting.Take_Profit__c,
-                                Close_position_based_on_age__c = algoSetting.Close_position_based_on_age__c,
-                                Max_age_In_Minutes__c = algoSetting.Max_age_In_Minutes__c,
-                                Is_Test__c = algoSetting.Is_Test__c,
-                                Bid__c = current.Bid__c,
-                                Price__c = current.Bid__c,
-                                Trailing_Stop_Loss__c = algoSetting.Trailing_Stop_Loss__c,
-                                Trailing_Stop_Loss_Value__c = algoSetting.Trailing_Stop_Loss_Value__c,
-                                Quantity__c = 1,
-                                Start_At_Change__c = current.Change__c
-                        );
-                    }
+                        WHERE Symbol__c = :current.Symbol__c AND Status__c = 'open'
+                          AND Algo__c = :algoSetting.Name__c
+                ].size() == 0) {
+                    System.enqueueJob(new StartTrade(current, algoSetting));
                 }
+                //   }
             }
         }
     }
@@ -152,5 +132,42 @@ with sharing abstract class AlgoBase implements IAlgo {
 
     public virtual Boolean testSell() {
         return false;
+    }
+
+    class StartTrade implements Queueable {
+        Signal__c current;
+        Algo_Setting__mdt algoSetting;
+        Decimal btcAmoutForEachTrade;
+        public StartTrade(Signal__c current, Algo_Setting__mdt algoSetting) {
+            this.current = current;
+            this.algoSetting = algoSetting;
+        }
+
+        public void execute(QueueableContext param1) {
+//            String symbol = current.Symbol__c;
+//            Long quantity = btcAmoutForEachTrade / current.Bid__c;
+
+//           String tradeId= Binance.BuyMarket(symbol, quantity);
+
+            insert new Trade__c(Side__c = 'buy', Status__c = 'open',
+                    Symbol__c = current.Symbol__c, Type__c = 'market',
+                    Signal_Id__c = current.signal_Id__c,
+                    Algo__c = algoSetting.Name__c,
+//                    Trade_Id__c=tradeId,
+                    Take_Profit__c = algoSetting.Take_Profit__c,
+                    Stop_Loss__c = algoSetting.Stop_Loss__c,
+                    System_Stop_Loss__c = algoSetting.Stop_Loss__c,
+                    System_Take_Profit__c = algoSetting.Take_Profit__c,
+                    Close_position_based_on_age__c = algoSetting.Close_position_based_on_age__c,
+                    Max_age_In_Minutes__c = algoSetting.Max_age_In_Minutes__c,
+                    Is_Test__c = algoSetting.Is_Test__c,
+                    Bid__c = current.Bid__c,
+                    Price__c = current.Bid__c,
+                    Trailing_Stop_Loss__c = algoSetting.Trailing_Stop_Loss__c,
+                    Trailing_Stop_Loss_Value__c = algoSetting.Trailing_Stop_Loss_Value__c,
+                    Quantity__c = 1,
+                    Start_At_Change__c = current.Change__c
+            );
+        }
     }
 }

@@ -4,7 +4,7 @@ public with sharing class AllAlgos implements ITask {
     public allAlgos() {
         for (Algo_Setting__mdt algoSetting : [
                 SELECT Name__c, Is_Test__c,Timeframe__c,Max_age_In_Minutes__c,Close_position_based_on_age__c,Stop_Loss__c,
-                        Take_Profit__c,Is_active__c,Trade_Count__c,Trailing_Stop_Loss__c,Trailing_Stop_Loss_Value__c
+                        Take_Profit__c,Is_active__c,Trade_Count__c,Trailing_Stop_Loss__c,Trailing_Stop_Loss_Value__c,Enter_Trade_At_Change__c
                 FROM Algo_Setting__mdt
                 WHERE Is_active__c = TRUE
         ]) {

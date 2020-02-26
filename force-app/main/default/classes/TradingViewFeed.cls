@@ -1,6 +1,8 @@
 public with sharing class TradingViewFeed implements ITask {
     static String exchangeId = 'binance';
-    static String filter = 'btc$';
+//    static String filter = 'btc$';
+//    static String filter = '^((GTOBTC)|(FTMBTC)|(MTHBTC)|(OSTBTC)|(YOYOBTC)|(CHZBTC)|(QSPBTC)|(SNMBTC)|(REQBTC)|(CMTBTC)|(QLCBTC)|(VITEBTC)|(DATABTC)|(POABTC)|(VIBEBTC)|(SNTBTC)|(GOBTC)|(MATICBTC)|(ARPABTC)|(TRXBTC)|(AMBBTC)|(NKNBTC)|(ASTBTC)|(VIBBTC)|(AGIBTC)|(LOOMBTC)|(BLZBTC)|(BCPTBTC)|(POLYBTC)|(BTSBTC)|(RVNBTC)|(LENDBTC)|(CVCBTC)|(LRCBTC)|(SYSBTC)|(PERLBTC)|(DUSKBTC)|(FETBTC)|(BQXBTC)|(APPCBTC)|(DLTBTC)|(HBARBTC)|(MANABTC)|(ADABTC)|(TNTBTC)|(RENBTC)|(ARDRBTC)|(XEMBTC)|(LTOBTC)|(RCNBTC)|(OAXBTC)|(GNTBTC)|(XLMBTC)|(WRXBTC)|(POWRBTC)|(CTXCBTC)|(ADXBTC)|(NAVBTC)|(AIONBTC)|(ENJBTC)|(THETABTC)|(ELFBTC)|(ARNBTC)|(STXBTC)|(WABIBTC)|(RDNBTC)|(STORJBTC)|(ONGBTC)|(INSBTC)|(AEBTC)|(EDOBTC)|(GRSBTC)|(STEEMBTC)|(NXSBTC)|(VIABTC)|(ARKBTC)|(BRDBTC)|(WANBTC)|(BATBTC)|(IOTABTC)|(XRPBTC)|(ZRXBTC)|(BANDBTC)|(BNTBTC)|(OGNBTC)|(NULSBTC)|(ALGOBTC)|(EVXBTC)|(ICXBTC)|(MTLBTC)|(PIVXBTC)|(STRATBTC)|(KNCBTC)|(PPTBTC)|(ENGBTC)|(TOMOBTC)|(GXSBTC)|(NASBTC)|(WTCBTC)|(RLCBTC)|(SKYBTC)|(MDABTC)|(BEAMBTC)|(KMDBTC)|(NEBLBTC)|(BCDBTC)|(ONTBTC)|(KAVABTC)|(NANOBTC)|(LUNBTC)|(OMGBTC)|(WAVESBTC)|(GVTBTC)|(LSKBTC)|(HCBTC))';
+    static String filter = '^((MTHBTC)|(OSTBTC)|(YOYOBTC)|(CHZBTC)|(QSPBTC)|(SNMBTC)|(REQBTC)|(CMTBTC)|(QLCBTC)|(VITEBTC)|(DATABTC)|(POABTC)|(VIBEBTC)|(SNTBTC)|(GOBTC)|(MATICBTC)|(ARPABTC)|(TRXBTC)|(AMBBTC)|(NKNBTC)|(ASTBTC)|(VIBBTC)|(AGIBTC)|(LOOMBTC)|(BLZBTC)|(BCPTBTC)|(POLYBTC)|(BTSBTC)|(RVNBTC)|(LENDBTC)|(CVCBTC)|(LRCBTC)|(SYSBTC)|(PERLBTC)|(DUSKBTC)|(FETBTC)|(BQXBTC)|(APPCBTC)|(DLTBTC)|(HBARBTC)|(MANABTC)|(ADABTC)|(TNTBTC)|(RENBTC)|(ARDRBTC)|(XEMBTC)|(LTOBTC)|(RCNBTC)|(OAXBTC)|(GNTBTC)|(XLMBTC)|(WRXBTC)|(POWRBTC)|(CTXCBTC)|(ADXBTC)|(NAVBTC)|(AIONBTC)|(ENJBTC)|(THETABTC)|(ELFBTC)|(ARNBTC)|(STXBTC)|(WABIBTC)|(RDNBTC)|(STORJBTC)|(ONGBTC)|(INSBTC)|(AEBTC)|(EDOBTC)|(GRSBTC)|(STEEMBTC)|(NXSBTC)|(VIABTC)|(ARKBTC)|(BRDBTC)|(WANBTC)|(BATBTC)|(IOTABTC)|(XRPBTC)|(ZRXBTC)|(BANDBTC)|(BNTBTC)|(OGNBTC)|(NULSBTC)|(ALGOBTC)|(EVXBTC)|(ICXBTC)|(MTLBTC)|(PIVXBTC)|(STRATBTC)|(KNCBTC)|(PPTBTC)|(ENGBTC)|(TOMOBTC)|(GXSBTC)|(NASBTC)|(WTCBTC)|(RLCBTC)|(SKYBTC)|(MDABTC)|(BEAMBTC)|(KMDBTC)|(NEBLBTC)|(BCDBTC)|(ONTBTC)|(KAVABTC)|(NANOBTC)|(LUNBTC)|(OMGBTC)|(WAVESBTC)|(GVTBTC)|(LSKBTC)|(HCBTC))';
     static Set<Integer> timeframes = new Set<Integer>();
 
     static void initTimeframes() {
@@ -20,9 +22,9 @@ public with sharing class TradingViewFeed implements ITask {
             timeframeFilter = '|' + timeframe;
         }
         String body = '{' + '"filter": [' +
-                '{ "left": "change' + timeframeFilter + '", "operation": "nempty" },' +
-                '{ "left": "exchange", "operation": "equal", "right":"' + exchangeId.toUpperCase() + '" },' +
-                '{ "left": "name,description", "operation": "match", "right":"' + filter + '" }' +
+                '{ "left": "change' + timeframeFilter + '", "operation": "nempty" }' +
+                ',{ "left": "exchange", "operation": "equal", "right":"' + exchangeId.toUpperCase() + '" }' +
+                ',{ "left": "name,description", "operation": "match", "right":"' + filter + '" }' +
 //                ',{"left":"change_abs","operation":"greater","right":1e-7}' +
                 '],' +
                 '"symbols": { "query": { "types": [] } },' +
