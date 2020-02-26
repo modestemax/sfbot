@@ -114,13 +114,34 @@ with sharing abstract class AlgoBase implements IAlgo {
                         WHERE Symbol__c = :current.Symbol__c AND Status__c = 'open'
                           AND Algo__c = :algoSetting.Name__c
                 ].size() == 0) {
-                    System.enqueueJob(new StartTrade(current, algoSetting));
+                    //System.enqueueJob(new StartTrade(current, algoSetting));
+                    StartTrade(current, algoSetting);
                 }
                 //   }
             }
         }
     }
-
+  public void  StartTrade(Signal__c current, Algo_Setting__mdt algoSetting) {
+           insert new Trade__c(Side__c = 'buy', Status__c = 'open',
+                    Symbol__c = current.Symbol__c, Type__c = 'market',
+                    Signal_Id__c = current.signal_Id__c,
+                    Algo__c = algoSetting.Name__c,
+//                    Trade_Id__c=tradeId,
+                    Take_Profit__c = algoSetting.Take_Profit__c,
+                    Stop_Loss__c = algoSetting.Stop_Loss__c,
+                    System_Stop_Loss__c = algoSetting.Stop_Loss__c,
+                    System_Take_Profit__c = algoSetting.Take_Profit__c,
+                    Close_position_based_on_age__c = algoSetting.Close_position_based_on_age__c,
+                    Max_age_In_Minutes__c = algoSetting.Max_age_In_Minutes__c,
+                    Is_Test__c = algoSetting.Is_Test__c,
+                    Bid__c = current.Bid__c,
+                    Price__c = current.Bid__c,
+                    Trailing_Stop_Loss__c = algoSetting.Trailing_Stop_Loss__c,
+                    Trailing_Stop_Loss_Value__c = algoSetting.Trailing_Stop_Loss_Value__c,
+                    Quantity__c = 1,
+                    Start_At_Change__c = current.Change__c
+            ); 
+        }
     public Boolean testBuyCatch() {
         try {
             return testBuy();
