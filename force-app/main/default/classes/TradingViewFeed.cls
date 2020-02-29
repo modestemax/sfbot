@@ -158,11 +158,16 @@ public with sharing class TradingViewFeed implements ITask {
             newMap.put(signal.Name, signal);
         }
 
-        for (Signal__c old : [SELECT Name FROM Signal__c WHERE Name IN :newMap.keySet()]) {
+        for (Signal__c old : [SELECT Name,First_At_Change__c FROM Signal__c WHERE Name IN :newMap.keySet()]) {
             Signal__c signal = newMap.get(old.Name);
             if (signal != null) {
                 System.debug('update signal ' + signal.Name);
                 signal.Id = old.Id;
+                if (signal.rank__c != 1) {
+                    signal.First_At_Change__c = old.First_At_Change__c;
+                } else if(signal.Change__c>3) {
+                    signal.First_At_Change__c = signal.Change__c.round(System.RoundingMode.DOWN);
+                }
             }
         }
         upsert newMap.values();
