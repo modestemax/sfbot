@@ -165,8 +165,11 @@ public with sharing class TradingViewFeed implements ITask {
                 signal.Id = old.Id;
                 if (signal.rank__c != 1) {
                     signal.First_At_Change__c = old.First_At_Change__c;
-                } else if(signal.Change__c>3) {
-                    signal.First_At_Change__c = signal.Change__c.round(System.RoundingMode.DOWN);
+                } else if (signal.Change__c > 3) {
+                    Decimal First_At_Change = signal.Change__c.round(System.RoundingMode.DOWN);
+                    if (old.First_At_Change__c < First_At_Change) {
+                        signal.First_At_Change__c = First_At_Change;
+                    }
                 }
             }
         }
